@@ -709,14 +709,14 @@ const TIER_SKILLS = {
 };
 
 const KPIS = [
-  { id:'kpi1', name:'Collections & Financial Goal Achievement', sub:'Collections vs. monthly financial target',              target:'≥ 95%'  },
-  { id:'kpi2', name:'Phone Answer Rate',                        sub:'% of inbound calls answered — no missed calls',         target:'95%+'   },
-  { id:'kpi3', name:'New Patient Conversion',                   sub:'Phone inquiries converted to new patient appointments',  target:'60%+'   },
-  { id:'kpi4', name:'Case Acceptance Rate',                     sub:'Doctor treatment plan acceptance rate (office-wide)',    target:'40%+'   },
-  { id:'kpi5', name:'Treatment Plan & IV Accuracy',             sub:'Fee estimates and insurance verification accuracy',      target:'95%+'   },
-  { id:'kpi6', name:'EOB & Payment Posting Accuracy',           sub:'Accuracy and timeliness of payment posting and EOBs',   target:'100%'   },
-  { id:'kpi7', name:'Aging Report Follow-Up',                   sub:'Daily and weekly AR follow-up completion (no skipped days)', target:'100%' },
-  { id:'kpi8', name:'Schedule Fill & Office Efficiency',        sub:'Chairs filled vs. capacity; patient flow management',   target:'95%+'   },
+  { id:'kpi1', name:'Production',                             sub:'Gross or Net Production for the whole office for the period selected',                                                     target:''                     },
+  { id:'kpi2', name:'Collections',                            sub:'Amount of money collected on the agreed-upon fees charged',                                                               target:''                     },
+  { id:'kpi3', name:'Collections %',                          sub:'Dollars actually collected ÷ Gross Production for the period (reported on the income statement)',                         target:'98% of net collections'},
+  { id:'kpi4', name:'Overtime Hours',                         sub:'# of overtime hours employees worked the previous week — intentional management helps staffing and scheduling decisions', target:'',        optional:true },
+  { id:'kpi5', name:'# Google Reviews',                       sub:'# of Google Reviews received during the week',                                                                            target:'',        optional:true },
+  { id:'kpi6', name:'Average Google Review Ranking',          sub:'Average star rating of Google reviews given during the week',                                                             target:'4.9'                  },
+  { id:'kpi7', name:'% of Team Members Hitting Their KPIs',  sub:'Total # of team members ÷ # who hit their individual KPIs during the period',                                            target:'80%+'                 },
+  { id:'kpi8', name:'AR Aging',                               sub:'Accounts receivable — total amount owed to the practice by patients with a balance',                                     target:'',        optional:true },
 ];
 
 const PERF_SECTIONS = [
