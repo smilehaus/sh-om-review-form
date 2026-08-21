@@ -640,11 +640,13 @@ body.form-locked .skill-delete-btn { display: none; }
 
 // OM tier structure — single rate table for all offices
 const TIERS_STANDARD = {
-  T1: { floor:30, ceiling:30, x:0.010, next:'T2', label:'New Office Manager',              rate:'$30/hr'    },
-  T2: { floor:30, ceiling:31, x:0.015, next:'T3', label:'Developing Office Manager',       rate:'$30–31/hr' },
-  T3: { floor:31, ceiling:32, x:0.020, next:'T4', label:'Proficient Office Manager',       rate:'$31–32/hr' },
-  T4: { floor:32, ceiling:33, x:0.025, next:'T5', label:'High-Performing Office Manager',  rate:'$32–33/hr' },
-  T5: { floor:33, ceiling:34, x:0.030, next:null,  label:'Senior / Lead Office Manager',   rate:'$33–34/hr' },
+  T1: { floor:30, ceiling:30, x:0.010, next:'T2', label:'New Office Manager',              rate:'$30/hr' },
+  T2: { floor:31, ceiling:31, x:0.015, next:'T3', label:'Developing Office Manager',       rate:'$31/hr' },
+  T3: { floor:32, ceiling:32, x:0.020, next:'T4', label:'Proficient Office Manager',       rate:'$32/hr' },
+  T4: { floor:33, ceiling:33, x:0.025, next:'T5', label:'High-Performing Office Manager',  rate:'$33/hr' },
+  T5: { floor:34, ceiling:34, x:0.030, next:'T6', label:'Senior Office Manager',           rate:'$34/hr' },
+  T6: { floor:35, ceiling:35, x:0.035, next:'T7', label:'Lead Office Manager',             rate:'$35/hr' },
+  T7: { floor:36, ceiling:36, x:0.040, next:null,  label:'Senior Lead Office Manager',     rate:'$36/hr' },
 };
 
 function getActiveTiers() {
@@ -689,6 +691,20 @@ const TIER_SKILLS = {
     'Manages crises and unexpected operational situations without oversight',
     'Proficient with all vendor relationships (dental suppliers, labs, insurance portals)',
     'Operates autonomously; proactively identifies and resolves issues before they surface',
+  ],
+  T6: [
+    'Office consistently top-quartile across all 8 KPIs for ≥ 6 consecutive months',
+    'Independently manages complex insurance disputes and compliance escalations',
+    'Recognized by doctors and regional leadership as a culture and performance leader',
+    'Leads cross-office initiatives or projects beyond own office scope',
+    'Develops and documents new SOPs or process improvements adopted by leadership',
+  ],
+  T7: [
+    'Serves as a regional resource; all KPI targets exceeded for ≥ 12 consecutive months',
+    'Onboards and coaches new OMs across the Smile Haus network',
+    'Manages operations during leadership transitions or crises without any oversight',
+    'Proactively proposes process improvements that are adopted organization-wide',
+    'Trusted to represent Smile Haus in external vendor or compliance conversations',
   ],
 };
 
@@ -851,7 +867,7 @@ function renderPerf() {
 
 function renderTierAccordion() {
   const accordion = document.getElementById('tierAccordion');
-  const tierKeys = ['T1','T2','T3','T4','T5'];
+  const tierKeys = ['T1','T2','T3','T4','T5','T6','T7'];
   accordion.innerHTML = tierKeys.map(key => {
     const tier = TIERS_STANDARD[key];
     const skills = TIER_SKILLS[key];
@@ -1058,7 +1074,7 @@ function recalc() {
   // Gate calculation
   const tierKey = document.getElementById('currentTier').value;
   const tier = getActiveTiers()[tierKey];
-  const tierKeys = ['T1','T2','T3','T4','T5'];
+  const tierKeys = ['T1','T2','T3','T4','T5','T6','T7'];
 
   // Update tier badges and status indicators
   tierKeys.forEach(k => {
@@ -1337,7 +1353,7 @@ function rateToTier(rate) {
   const r = parseFloat(rate);
   if (isNaN(r) || r <= 0) return '';
   const tiers = getActiveTiers();
-  const keys = ['T1','T2','T3','T4','T5'];
+  const keys = ['T1','T2','T3','T4','T5','T6','T7'];
   for (const k of keys) {
     if (r >= tiers[k].floor && r <= tiers[k].ceiling) return k;
   }
@@ -1418,7 +1434,7 @@ async function handleSubmit() {
   }
   // Require tier competency checklist filled for current tier and all tiers below
   {
-    const tierKeys = ['T1','T2','T3','T4','T5'];
+    const tierKeys = ['T1','T2','T3','T4','T5','T6','T7'];
     const currentIdx = tierKeys.indexOf(tier);
     const tiersToCheck = tierKeys.slice(0, currentIdx + 1);
     let allMarked = true;
@@ -1470,7 +1486,7 @@ async function handleSubmit() {
       if ((el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA') && el.id && el.id !== 'pinInput') formState[el.id] = el.value;
     });
     document.querySelectorAll('[data-editable][id]').forEach(el => { formState[el.id] = el.textContent; });
-    ['T1','T2','T3','T4','T5'].forEach(k => {
+    ['T1','T2','T3','T4','T5','T6','T7'].forEach(k => {
       const body = document.getElementById(`tierBody_${k}`);
       if (!body) return;
       const base = TIER_SKILLS[k].length;
@@ -1936,7 +1952,7 @@ async function saveDraft() {
     }
   });
   document.querySelectorAll('[data-editable][id]').forEach(el => { state[el.id] = el.textContent; });
-  ['T1','T2','T3','T4','T5'].forEach(k => {
+  ['T1','T2','T3','T4','T5','T6','T7'].forEach(k => {
     const body = document.getElementById(`tierBody_${k}`);
     if (!body) return;
     const base = TIER_SKILLS[k].length;
@@ -2248,7 +2264,7 @@ const SKILLS_KEY   = 'sh_om_review_skills';   // auto-saved custom skills — no
 
 function getCustomSkills() {
   const cs = {};
-  ['T1','T2','T3','T4','T5'].forEach(k => {
+  ['T1','T2','T3','T4','T5','T6','T7'].forEach(k => {
     const body = document.getElementById(`tierBody_${k}`);
     if (!body) return;
     const base = TIER_SKILLS[k].length;
@@ -2334,7 +2350,7 @@ function restoreCustomSkills() {
 function saveTemplate(quiet = false) {
   const template = { customSkills: getCustomSkills(), skillNames: {}, kpiNames: {}, perfNames: {}, perfDescs: {} };
   // Capture any renamed base skill labels
-  ['T1','T2','T3','T4','T5'].forEach(k => {
+  ['T1','T2','T3','T4','T5','T6','T7'].forEach(k => {
     const body = document.getElementById(`tierBody_${k}`);
     if (!body) return;
     const rows = body.querySelectorAll('.skill-row');
@@ -2408,7 +2424,7 @@ function saveFormState() {
       state[el.id] = el.textContent;
     });
     // Dynamic added skills (beyond base TIER_SKILLS count)
-    ['T1','T2','T3','T4','T5'].forEach(k => {
+    ['T1','T2','T3','T4','T5','T6','T7'].forEach(k => {
       const body = document.getElementById(`tierBody_${k}`);
       if (!body) return;
       const base = TIER_SKILLS[k].length;
@@ -2513,7 +2529,7 @@ function restoreFormState() {
 
 // Populate currentTier dropdown from OM TIERS_STANDARD
 (function initTierDropdown() {
-  const keys = ['T1','T2','T3','T4','T5'];
+  const keys = ['T1','T2','T3','T4','T5','T6','T7'];
   const labels = [
     'New Office Manager', 'Developing Office Manager', 'Proficient Office Manager',
     'High-Performing Office Manager', 'Senior / Lead Office Manager',
