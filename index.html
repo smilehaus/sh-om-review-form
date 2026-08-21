@@ -1820,7 +1820,7 @@ async function generatePDF(summary) {
     window.scrollTo({ top: savedScrollY, behavior: 'instant' });
   }
 
-  // ── 4. Slice canvas into A4 pages ─────────────────────────────────────────
+  // ── 4. Smart-slice canvas into A4 pages ──────────────────────────────────
   const imgData = canvas.toDataURL('image/jpeg', 0.93);
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   const pdfW = pdf.internal.pageSize.getWidth();   // 210 mm
@@ -1830,13 +1830,49 @@ async function generatePDF(summary) {
   const imgW = pdfW;
   const imgH = (canvas.height * imgW) / canvas.width;
 
-  let yPos = 0;
-  pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
-  while (yPos + pdfH < imgH) {
-    yPos += pdfH;
-    pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, -yPos, imgW, imgH);
+  // Find natural page breaks by scanning pixel rows for background color (#F2EFE8)
+  const cW = canvas.width, cH = canvas.height;
+  const scale = cW / pdfW;                          // canvas px per mm
+  const pdfHpx = pdfH * scale;                      // ideal page height in canvas px
+  const SEARCH = Math.round(0.07 * pdfHpx);         // search ±7% around ideal break
+  const bgR = 0xF2, bgG = 0xEF, bgB = 0xE8;
+
+  const allPx = canvas.getContext('2d').getImageData(0, 0, cW, cH).data;
+  function rowLightness(y) {
+    const base = y * cW * 4;
+    let match = 0;
+    for (let x = 0; x < cW; x++) {
+      const i = base + x * 4;
+      if (Math.abs(allPx[i]-bgR)+Math.abs(allPx[i+1]-bgG)+Math.abs(allPx[i+2]-bgB) < 55) match++;
+    }
+    return match / cW;
   }
+
+  // Build list of break positions (canvas px)
+  const breaks = [];
+  let pos = 0;
+  while (pos < cH) {
+    const ideal = pos + pdfHpx;
+    if (ideal >= cH) break;
+    const lo = Math.max(pos + Math.round(pdfHpx * 0.6), ideal - SEARCH);
+    const hi = Math.min(cH - 1, ideal + SEARCH);
+    let bestY = ideal, bestL = -1;
+    for (let y = lo; y <= hi; y++) {
+      const l = rowLightness(y);
+      if (l > bestL) { bestL = l; bestY = y; }
+    }
+    breaks.push(bestY);
+    pos = bestY;
+  }
+
+  // Render pages — each page shows the canvas segment starting at startPx
+  let startPx = 0;
+  breaks.forEach(breakPx => {
+    pdf.addImage(imgData, 'JPEG', 0, -(startPx / scale), imgW, imgH);
+    pdf.addPage();
+    startPx = breakPx;
+  });
+  pdf.addImage(imgData, 'JPEG', 0, -(startPx / scale), imgW, imgH); // last page
 
   return pdf.output('datauristring').split(',')[1];
 }
